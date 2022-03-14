@@ -25,30 +25,25 @@ router.get("/post/:id", auth, async (req, res) => {
     const post = await Blog.findById(req.params.id);
     res.status(200).send(post);
   } catch (err) {
-    res.status(500).send(err);
+    res.status(400).send(err);
   }
 });
 
 //GET ALL POSTS
-router.get("/post", async (req, res) => {
-  const username = req.query.user;
-  const catName = req.query.cat;
+// GET /tasks?completed=true
+// GET /tasks?limit=10&skip=20
+router.get("/post", auth, async (req, res) => {
   try {
-    let posts;
-    if (username) {
-      posts = await Blog.find({ username });
-    } else if (catName) {
-      posts = await Blog.find({
-        categories: {
-          $in: [catName],
-        },
-      });
-    } else {
-      posts = await Blog.find();
-    }
-    res.status(200).send(posts);
+      await req.user.populate({
+          path:'blogs', 
+          options: {
+              limit: parseInt(req.query.limit),
+              skip: parseInt(req.query.skip)
+          }
+  })
+    res.send(req.user.blogs);
   } catch (err) {
-    res.status(500).send(err);
+    res.status(400).send(err.message);
   }
 });
 
@@ -67,7 +62,7 @@ router.put("/post/:id", async (req, res) => {
         );
         res.status(200).send(updatedPost);
       } catch (err) {
-        res.status(500).send(err);
+        res.status(400).send(err);
       }
     } else {
       res.status(401).send({message: "You can update only your post!"});
