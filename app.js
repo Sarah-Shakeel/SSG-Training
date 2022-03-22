@@ -3,6 +3,7 @@ const express = require('express');
 require('./src/db/mongoose');
 const userRouter = require('./src/routes/user-routes');
 const postRouter = require('./src/routes/blog-posts-routes')
+const categoryRouter = require('./src/routes/category-routes')
 const cors = require('cors')
 const path = require('path')
 
@@ -13,22 +14,12 @@ const viewsForgetPasswordPath = path.join(__dirname, './src/views/reset-password
 const viewsSuccessMessagePath = path.join(__dirname, './src/views/reset-password-success-message.html');
 
 app.use(cors())
-app.use(express.json());
-app.use(userRouter);
+app.use(express.json())
+app.use(userRouter)
 app.use(postRouter)
-
-const multer = require('multer')
-const upload = multer({
-    dest: 'images'
-})
-
-app.post('/upload', upload.single('upload'), (req,res) => {
-    res.send()
-})
-
+app.use(categoryRouter)
 
 app.set('view engine', 'twig')
-// app.set('views', viewsPath);
 app.use('/forgetPassword', express.static(viewsForgetPasswordPath))
 app.use('/forgetPassword/success_message', express.static(viewsSuccessMessagePath))
 
@@ -38,18 +29,18 @@ app.listen(port, () => {
 
 
 
-const jwt = require('jsonwebtoken')
+// const jwt = require('jsonwebtoken')
 
-const myFunction = async () => {
-    const token = jwt.sign({_id: 'abc123'}, 'ThisIsMyJsonWebToken')
-    // console.log(token)
+// const myFunction = async () => {
+//     const token = jwt.sign({_id: 'abc123'}, 'ThisIsMyJsonWebToken')
+//     // console.log(token)
 
-    const data = jwt.verify(token, 'ThisIsMyJsonWebToken')  // this is the secret for verification method of JWT Library -> ThisIsMyJsonWebToken
-//                                                             it should be same as given AnimationPlaybackEvent.
-// console.log(data)
-}
+//     const data = jwt.verify(token, 'ThisIsMyJsonWebToken')  // this is the secret for verification method of JWT Library -> ThisIsMyJsonWebToken
+// //                                                             it should be same as given AnimationPlaybackEvent.
+// // console.log(data)
+// }
 
-myFunction()
+// myFunction()
 
 
 //using express middleware

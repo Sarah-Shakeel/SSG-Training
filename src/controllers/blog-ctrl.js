@@ -8,7 +8,6 @@ const createBlog = async (body, user) => {
         ...body,
         owner: user._id
     })
-    console.log(`I'm here after checking duplicate title.`)
     await validateModel(blog)
     await blog.save()
     return {blog}
@@ -16,7 +15,6 @@ const createBlog = async (body, user) => {
 
 const checkDuplicateBlog = async (body) => {
     if (body.title) {
-        console.log(body.title)
         const userInfo = await Blog.findOne({ title: body.title })
         if (userInfo) {
             throw new BusinessError(DUPLICATE_DATA, "Blog Title already exists. Choose another title for your blog!")
@@ -72,7 +70,6 @@ const fetchAllBlogs = async ({ skip=0, limit=0 }, user) => {
 
 const updateBlog = async (id, body, user) => {
     const blog = await Blog.findOne({id, owner: user._id});
-    console.log(blog)
     const updates = Object.keys(body);
     const allowedUpdates = ['title', 'description'];
     const isValidOperation = updates.every((update)  => {

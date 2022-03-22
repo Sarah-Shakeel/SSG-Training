@@ -2,33 +2,43 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
+const BusinessError = require('../errors/business-error');
+const { MISSING_DATA, FORBIDDEN, BAD_REQUEST, NOT_FOUND } = require('../errors/error-types');
 
 const userSchema = mongoose.Schema({
     name: {
         type: String,
         required: true,
-        trim: true
-    },
+        trim: true,
+        minlength: 4,
+        maxlength: 15
+        },
     age: {
         type: Number,
-        default: 2,
+        default: 10,
         validate(value) {
             if(value < 0) {
-                throw new Error('Enter a valid age!');
+                throw new BusinessError(BAD_REQUEST, 'Enter a valid age!');
             }
         }
     },
     email: {
         type: String,
         unique: true,
-        required: true,
+        required: [true, "Email must be required!"],
         trim: true,
         lowercase: true,
-        validate(value) {
-            if(!validator.isEmail(value)) {
-                throw new Error('Enter a valid email!');
-            }
-        }
+        // validate(value) {
+        //     if(!validator.isEmail(value)) {
+        //         throw new BusinessError(BAD_REQUEST, 'Enter a valid email!');
+        //     }
+        // }
+        validate: {
+            validator: function (value) {
+                return validator.isEmail(value);
+            },
+            message: ({value}) => `${value} is not a valid email`
+        },
     },
     password: {
         type: String,
@@ -37,7 +47,7 @@ const userSchema = mongoose.Schema({
         trim: true,
         validate(value) {
             if(value.toLowerCase().includes('password')) {
-                throw new Error('Password cannot contain "password"!');
+                throw new BusinessError(FORBIDDEN, 'Password cannot contain "password"!');
             }
         }
     },
@@ -82,16 +92,16 @@ userSchema.methods.generateAuthToken = async function () {
 }
 
 userSchema.statics.findByCredentials = async (email, password) => {
-    const user = await User.findOne ({email: email});
+    const user = await User.findOne({email: email});
     console.log(user);
     if(!user) {
         console.log('There is no user with this email id!')
-        throw new Error('Unable to Login!');
+        throw new BusinessError(NOT_FOUND, 'There is no user with this email id!');
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch) {
         console.log('Apparently it is saying that there is no match!')
-        throw new Error('Unable to Login');
+        throw new BusinessError(BAD_REQUEST, `Apparently it is saying that password doesn't match!`);
     }
     return user;
 }

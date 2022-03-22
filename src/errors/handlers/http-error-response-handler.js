@@ -2,7 +2,6 @@ const _ = require('lodash');
 const BusinessError = require("../business-error");
 const CredentialsError = require('../credentials-error');
 const ErrorTypes = require("../error-types");
-const PaymentError = require('../../../payment-processor/errors/payment-error');
 
 
 module.exports = class HttpErrorResponseHandler {
@@ -52,6 +51,8 @@ module.exports = class HttpErrorResponseHandler {
             case ErrorTypes.MISSING_ATTRIBUTES:
                 this.responseFormat.status = 400;
                 break;
+            case ErrorTypes.BAD_REQUEST:
+                this.responseFormat.status = 400;
             default:
                 this.responseFormat.status = 400;
         }
